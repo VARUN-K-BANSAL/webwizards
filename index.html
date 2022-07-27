@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Varun's assignment</title>
+
+    <style>
+        #image {
+            border: 3px dotted #000;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="file" name="file" id="filereader" accept="image/*"><br><br>
+    <canvas id="image" width="800" height="600"></canvas>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.5.0/fabric.min.js"></script>
+
+    <script>
+        var imgElement = "";
+        var inputforupload = "";
+        var readerobj = "";
+
+        var canvasObj = new fabric.Canvas($('#image')[0]);
+        var readFile = function (e) {
+            inputforupload = e.target;
+            readerobj = new FileReader();
+            readerobj.onload = function () {
+                var imgElement = document.createElement('img');
+                imgElement.src = readerobj.result;
+                imgElement.onload = function () {
+                    var imageinstance = new fabric.Image(imgElement, {
+                        angle: 0,
+                        opacity: 1
+                    });
+                    var cw = $(".canvas-container").width();
+                    var ch = $(".canvas-container").height();
+                    if (cw > ch) {
+                        imageinstance.scaleToWidth($(".canvas-container").width() - 200);
+                        imageinstance.scaleToHeight($(".canvas-container").height() - 200);
+                    } else {
+                        imageinstance.scaleToHeight($(".canvas-container").height() - 200);
+                        imageinstance.scaleToWidth($(".canvas-container").width() - 200);
+                    }
+                    canvasObj.add(imageinstance);
+                    canvasObj.centerObject(imageinstance);
+                };
+            };
+            readerobj.readAsDataURL(inputforupload.files[0]);
+        };
+        $('#filereader')[0].addEventListener('change', readFile);
+
+        canvasObj.on('mouse:wheel', function (o) {
+            var delta = o.e.deltaY;
+            var pointer = canvasObj.getPointer(o.e);
+            var zoom = canvasObj.getZoom();
+            zoom = zoom + delta / 200;
+            if (zoom > 20) zoom = 20;
+            if (zoom < 1) zoom = 1;
+            canvasObj.zoomToPoint({ x: o.e.offsetX, y: o.e.offsetY }, zoom);
+            o.e.preventDefault();
+            o.e.stopPropagation();
+        });
+    </script>
+</body>
+
+</html>
